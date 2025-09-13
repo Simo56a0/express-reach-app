@@ -14,13 +14,171 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      package_events: {
+        Row: {
+          created_at: string | null
+          description: string
+          event_type: string
+          id: string
+          location: string | null
+          package_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          event_type: string
+          id?: string
+          location?: string | null
+          package_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          package_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_events_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      packages: {
+        Row: {
+          created_at: string | null
+          delivered_at: string | null
+          delivery_address: string
+          delivery_city: string
+          delivery_date: string | null
+          delivery_postal_code: string
+          dimensions: string | null
+          id: string
+          notes: string | null
+          package_type: string
+          pickup_address: string
+          pickup_city: string
+          pickup_date: string | null
+          pickup_postal_code: string
+          price_pounds: number
+          recipient_name: string
+          recipient_phone: string
+          sender_id: string | null
+          service_type: string
+          status: string
+          tracking_number: string
+          value_pounds: number | null
+          weight_kg: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          delivered_at?: string | null
+          delivery_address: string
+          delivery_city: string
+          delivery_date?: string | null
+          delivery_postal_code: string
+          dimensions?: string | null
+          id?: string
+          notes?: string | null
+          package_type: string
+          pickup_address: string
+          pickup_city: string
+          pickup_date?: string | null
+          pickup_postal_code: string
+          price_pounds: number
+          recipient_name: string
+          recipient_phone: string
+          sender_id?: string | null
+          service_type: string
+          status?: string
+          tracking_number?: string
+          value_pounds?: number | null
+          weight_kg?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          delivered_at?: string | null
+          delivery_address?: string
+          delivery_city?: string
+          delivery_date?: string | null
+          delivery_postal_code?: string
+          dimensions?: string | null
+          id?: string
+          notes?: string | null
+          package_type?: string
+          pickup_address?: string
+          pickup_city?: string
+          pickup_date?: string | null
+          pickup_postal_code?: string
+          price_pounds?: number
+          recipient_name?: string
+          recipient_phone?: string
+          sender_id?: string | null
+          service_type?: string
+          status?: string
+          tracking_number?: string
+          value_pounds?: number | null
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          postal_code: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          postal_code?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          postal_code?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      track_package: {
+        Args: { tracking_num: string }
+        Returns: {
+          created_at: string
+          delivered_at: string
+          delivery_city: string
+          delivery_date: string
+          id: string
+          pickup_date: string
+          recipient_name: string
+          status: string
+          tracking_number: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
