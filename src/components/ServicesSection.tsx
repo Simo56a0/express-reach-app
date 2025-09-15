@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, Package, Truck, MapPin, Shield, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const services = [
   {
@@ -48,6 +49,8 @@ const services = [
 ];
 
 const ServicesSection = () => {
+  const navigate = useNavigate();
+  
   return (
     <section id="services" className="py-20 bg-muted/50">
       <div className="container mx-auto px-4">
@@ -86,7 +89,11 @@ const ServicesSection = () => {
                     </li>
                   ))}
                 </ul>
-                <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <Button 
+                  variant="outline" 
+                  className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                  onClick={() => navigate('/book')}
+                >
                   Book Now
                 </Button>
               </CardContent>
@@ -95,7 +102,11 @@ const ServicesSection = () => {
         </div>
 
         <div className="text-center mt-12">
-          <Button variant="hero" size="lg">
+          <Button 
+            variant="hero" 
+            size="lg"
+            onClick={() => navigate('/services')}
+          >
             View All Services
           </Button>
         </div>

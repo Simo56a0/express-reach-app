@@ -1,9 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Clock, Shield, Truck } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-courier.jpg";
 
 const HeroSection = () => {
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const navigate = useNavigate();
+
+  const handleTrack = () => {
+    if (trackingNumber.trim()) {
+      navigate(`/track?number=${trackingNumber}`);
+    }
+  };
+
   return (
     <section className="relative bg-background py-20 overflow-hidden">
       <div className="container mx-auto px-4">
@@ -30,8 +41,11 @@ const HeroSection = () => {
                 <Input 
                   placeholder="Enter tracking number..." 
                   className="flex-1"
+                  value={trackingNumber}
+                  onChange={(e) => setTrackingNumber(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
                 />
-                <Button variant="default">
+                <Button variant="default" onClick={handleTrack}>
                   Track
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -40,11 +54,21 @@ const HeroSection = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="hero" size="lg" className="text-lg px-8 py-6">
+              <Button 
+                variant="hero" 
+                size="lg" 
+                className="text-lg px-8 py-6"
+                onClick={() => navigate('/book')}
+              >
                 Book Delivery Now
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button variant="outline" size="lg" className="text-lg px-8 py-6">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="text-lg px-8 py-6"
+                onClick={() => navigate('/services')}
+              >
                 Learn More
               </Button>
             </div>
