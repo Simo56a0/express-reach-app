@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Package, Clock, MapPin, Phone } from 'lucide-react';
+import { Package, Clock, MapPin, Phone, ShieldX } from 'lucide-react';
 import PackageChat from '@/components/PackageChat';
 
 interface Package {
@@ -33,16 +34,49 @@ interface Package {
 const DriverPortal = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [assignedJobs, setAssignedJobs] = useState<Package[]>([]);
   const [availableJobs, setAvailableJobs] = useState<Package[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDriver, setIsDriver] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
-      fetchJobs();
+      checkDriverAccess();
+    } else {
+      navigate('/auth');
     }
-  }, [user]);
+  }, [user, navigate]);
+
+  const checkDriverAccess = async () => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('user_type')
+        .eq('id', user?.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        navigate('/');
+        return;
+      }
+
+      if (profile?.user_type === 'driver') {
+        setIsDriver(true);
+        fetchJobs();
+      } else {
+        setIsDriver(false);
+      }
+    } catch (error) {
+      console.error('Error checking driver access:', error);
+      navigate('/');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const fetchJobs = async () => {
     try {
@@ -161,12 +195,35 @@ const DriverPortal = () => {
     }
   };
 
-  if (loading) {
+  if (profileLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <main className="container mx-auto px-4 py-8 text-center">
           <div>Loading driver portal...</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!isDriver) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <Card className="max-w-md mx-auto">
+            <CardContent className="py-8 text-center">
+              <ShieldX className="mx-auto h-16 w-16 text-destructive mb-4" />
+              <h2 className="text-2xl font-bold text-foreground mb-2">Access Denied</h2>
+              <p className="text-muted-foreground mb-4">
+                This portal is only accessible to registered drivers.
+              </p>
+              <Button onClick={() => navigate('/')} variant="outline">
+                Go to Homepage
+              </Button>
+            </CardContent>
+          </Card>
         </main>
         <Footer />
       </div>
