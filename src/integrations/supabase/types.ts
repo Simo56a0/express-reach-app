@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          package_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          package_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          package_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      faqs: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string
+          id: string
+          question: string
+          updated_at: string
+          user_type: string
+        }
+        Insert: {
+          answer: string
+          category?: string
+          created_at?: string
+          id?: string
+          question: string
+          updated_at?: string
+          user_type?: string
+        }
+        Update: {
+          answer?: string
+          category?: string
+          created_at?: string
+          id?: string
+          question?: string
+          updated_at?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
       package_events: {
         Row: {
           created_at: string | null
@@ -51,6 +123,7 @@ export type Database = {
       }
       packages: {
         Row: {
+          assigned_at: string | null
           created_at: string | null
           delivered_at: string | null
           delivery_address: string
@@ -58,6 +131,7 @@ export type Database = {
           delivery_date: string | null
           delivery_postal_code: string
           dimensions: string | null
+          driver_id: string | null
           id: string
           notes: string | null
           package_type: string
@@ -76,6 +150,7 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
+          assigned_at?: string | null
           created_at?: string | null
           delivered_at?: string | null
           delivery_address: string
@@ -83,6 +158,7 @@ export type Database = {
           delivery_date?: string | null
           delivery_postal_code: string
           dimensions?: string | null
+          driver_id?: string | null
           id?: string
           notes?: string | null
           package_type: string
@@ -101,6 +177,7 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
+          assigned_at?: string | null
           created_at?: string | null
           delivered_at?: string | null
           delivery_address?: string
@@ -108,6 +185,7 @@ export type Database = {
           delivery_date?: string | null
           delivery_postal_code?: string
           dimensions?: string | null
+          driver_id?: string | null
           id?: string
           notes?: string | null
           package_type?: string
@@ -125,38 +203,58 @@ export type Database = {
           value_pounds?: number | null
           weight_kg?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "packages_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
           address: string | null
           city: string | null
           created_at: string | null
+          driver_license: string | null
           full_name: string | null
           id: string
+          is_available: boolean | null
           phone: string | null
           postal_code: string | null
           updated_at: string | null
+          user_type: string | null
+          vehicle_type: string | null
         }
         Insert: {
           address?: string | null
           city?: string | null
           created_at?: string | null
+          driver_license?: string | null
           full_name?: string | null
           id: string
+          is_available?: boolean | null
           phone?: string | null
           postal_code?: string | null
           updated_at?: string | null
+          user_type?: string | null
+          vehicle_type?: string | null
         }
         Update: {
           address?: string | null
           city?: string | null
           created_at?: string | null
+          driver_license?: string | null
           full_name?: string | null
           id?: string
+          is_available?: boolean | null
           phone?: string | null
           postal_code?: string | null
           updated_at?: string | null
+          user_type?: string | null
+          vehicle_type?: string | null
         }
         Relationships: []
       }

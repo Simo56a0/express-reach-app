@@ -10,6 +10,8 @@ import Track from "./pages/Track";
 import Book from "./pages/Book";
 import Services from "./pages/Services";
 import Pricing from "./pages/Pricing";
+import DriverPortal from "./pages/DriverPortal";
+import FAQ from "./pages/FAQ";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
             <Route path="/book" element={<Book />} />
             <Route path="/services" element={<Services />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/driver-portal" element={<DriverPortal />} />
+            <Route path="/faq" element={<FAQ />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

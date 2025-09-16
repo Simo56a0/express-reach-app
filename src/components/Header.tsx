@@ -1,8 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Package, Menu, X } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,20 +28,47 @@ const Header = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <button onClick={() => navigate('/services')} className="text-foreground hover:text-primary transition-colors">
-              Services
-            </button>
-            <button onClick={() => navigate('/track')} className="text-foreground hover:text-primary transition-colors">
-              Track Package
-            </button>
-            <button onClick={() => navigate('/pricing')} className="text-foreground hover:text-primary transition-colors">
-              Pricing
-            </button>
-            <button onClick={() => navigate('/#contact')} className="text-foreground hover:text-primary transition-colors">
-              Contact
-            </button>
-          </nav>
+          <NavigationMenu className="hidden md:flex">
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <Link to="/services">
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Services
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/pricing">
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Pricing
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/track">
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Track Package
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/faq">
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    FAQ
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              {user && (
+                <NavigationMenuItem>
+                  <Link to="/driver-portal">
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      Driver Portal
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              )}
+            </NavigationMenuList>
+          </NavigationMenu>
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
@@ -48,7 +84,7 @@ const Header = () => {
             ) : (
               <>
                 <Button variant="ghost" onClick={() => navigate('/auth')}>Sign In</Button>
-                <Button variant="hero" onClick={() => navigate('/auth')}>Get Started</Button>
+                <Button onClick={() => navigate('/auth')}>Get Started</Button>
               </>
             )}
           </div>
@@ -91,7 +127,7 @@ const Header = () => {
                 ) : (
                   <>
                     <Button variant="ghost" onClick={() => navigate('/auth')}>Sign In</Button>
-                    <Button variant="hero" onClick={() => navigate('/auth')}>Get Started</Button>
+                    <Button onClick={() => navigate('/auth')}>Get Started</Button>
                   </>
                 )}
               </div>
