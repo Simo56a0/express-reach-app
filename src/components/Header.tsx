@@ -74,6 +74,9 @@ const Header = () => {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
+                <Button variant="ghost" onClick={() => navigate('/my-bookings')}>
+                  My Bookings
+                </Button>
                 <Button variant="ghost" onClick={() => navigate('/book')}>
                   Book Delivery
                 </Button>
@@ -83,6 +86,9 @@ const Header = () => {
               </>
             ) : (
               <>
+                <Button variant="ghost" onClick={() => navigate('/book')}>
+                  Book Now
+                </Button>
                 <Button variant="ghost" onClick={() => navigate('/auth')}>Sign In</Button>
                 <Button onClick={() => navigate('/auth')}>Get Started</Button>
               </>
@@ -117,6 +123,9 @@ const Header = () => {
               <div className="flex flex-col space-y-2 pt-4">
                 {user ? (
                   <>
+                    <Button variant="ghost" onClick={() => navigate('/my-bookings')}>
+                      My Bookings
+                    </Button>
                     <Button variant="ghost" onClick={() => navigate('/book')}>
                       Book Delivery
                     </Button>
@@ -126,6 +135,7 @@ const Header = () => {
                   </>
                 ) : (
                   <>
+                    <Button variant="ghost" onClick={() => navigate('/book')}>Book Now</Button>
                     <Button variant="ghost" onClick={() => navigate('/auth')}>Sign In</Button>
                     <Button onClick={() => navigate('/auth')}>Get Started</Button>
                   </>

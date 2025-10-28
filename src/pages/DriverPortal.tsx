@@ -7,10 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Package, Clock, MapPin, Phone, ShieldX } from 'lucide-react';
+import { Package, Clock, MapPin, Phone, ShieldX, Navigation } from 'lucide-react';
 import PackageChat from '@/components/PackageChat';
+import MultiStopRoute from '@/components/MultiStopRoute';
 
 interface Package {
   id: string;
@@ -31,6 +34,24 @@ interface Package {
   sender_id: string;
 }
 
+interface NearbyPackage {
+  id: string;
+  tracking_number: string;
+  status: string;
+  recipient_name: string;
+  recipient_phone: string;
+  pickup_address: string;
+  delivery_address: string;
+  pickup_city: string;
+  delivery_city: string;
+  package_type: string;
+  weight_kg: number;
+  price_pounds: number;
+  pickup_date: string;
+  delivery_date: string;
+  distance_km: number;
+}
+
 const DriverPortal = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -41,14 +62,39 @@ const DriverPortal = () => {
   const [loading, setLoading] = useState(true);
   const [isDriver, setIsDriver] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [showNearbyOnly, setShowNearbyOnly] = useState(false);
+  const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [nearbyJobs, setNearbyJobs] = useState<NearbyPackage[]>([]);
 
   useEffect(() => {
     if (user) {
       checkDriverAccess();
+      getDriverLocation();
     } else {
       navigate('/auth');
     }
   }, [user, navigate]);
+
+  const getDriverLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setDriverLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          toast({
+            title: "Location access denied",
+            description: "Enable location to see nearby jobs",
+            variant: "destructive"
+          });
+        }
+      );
+    }
+  };
 
   const checkDriverAccess = async () => {
     try {
@@ -89,7 +135,7 @@ const DriverPortal = () => {
 
       if (assignedError) throw assignedError;
 
-      // Fetch available jobs (not assigned to any driver)
+      // Fetch all available jobs
       const { data: available, error: availableError } = await supabase
         .from('packages')
         .select('*')
@@ -100,6 +146,19 @@ const DriverPortal = () => {
 
       setAssignedJobs(assigned || []);
       setAvailableJobs(available || []);
+
+      // Fetch nearby jobs if location is available
+      if (driverLocation) {
+        const { data: nearby, error: nearbyError } = await supabase.rpc('get_nearby_packages', {
+          driver_lat: driverLocation.lat,
+          driver_lon: driverLocation.lng,
+          max_distance_km: 50
+        });
+
+        if (!nearbyError && nearby) {
+          setNearbyJobs(nearby);
+        }
+      }
     } catch (error) {
       console.error('Error fetching jobs:', error);
       toast({
@@ -240,9 +299,10 @@ const DriverPortal = () => {
         </div>
 
         <Tabs defaultValue="assigned" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="assigned">My Jobs ({assignedJobs.length})</TabsTrigger>
-            <TabsTrigger value="available">Available Jobs ({availableJobs.length})</TabsTrigger>
+            <TabsTrigger value="available">Available Jobs</TabsTrigger>
+            <TabsTrigger value="route">Multi-Stop Route</TabsTrigger>
             <TabsTrigger value="chat">Chat</TabsTrigger>
           </TabsList>
 
@@ -323,25 +383,53 @@ const DriverPortal = () => {
           </TabsContent>
 
           <TabsContent value="available" className="space-y-4">
-            {availableJobs.length === 0 ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="nearby-filter"
+                  checked={showNearbyOnly}
+                  onCheckedChange={setShowNearbyOnly}
+                  disabled={!driverLocation}
+                />
+                <Label htmlFor="nearby-filter" className="cursor-pointer">
+                  Show nearby jobs only (within 50km)
+                </Label>
+              </div>
+              {driverLocation && showNearbyOnly && (
+                <Badge variant="outline">
+                  {nearbyJobs.length} nearby jobs
+                </Badge>
+              )}
+            </div>
+
+            {(showNearbyOnly ? nearbyJobs : availableJobs).length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center">
                   <Clock className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No available jobs at the moment</p>
+                  <p className="text-muted-foreground">
+                    {showNearbyOnly ? 'No nearby jobs found' : 'No available jobs at the moment'}
+                  </p>
                 </CardContent>
               </Card>
             ) : (
-              availableJobs.map((job) => (
-                <Card key={job.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">{job.tracking_number}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{job.recipient_name}</p>
+              (showNearbyOnly ? nearbyJobs : availableJobs).map((job) => {
+                const isNearbyJob = 'distance_km' in job;
+                return (
+                  <Card key={job.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">{job.tracking_number}</CardTitle>
+                          <p className="text-sm text-muted-foreground">{job.recipient_name}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge className="bg-green-500">£{job.price_pounds}</Badge>
+                          {isNearbyJob && (
+                            <Badge variant="outline">{(job as NearbyPackage).distance_km.toFixed(1)} km away</Badge>
+                          )}
+                        </div>
                       </div>
-                      <Badge className="bg-green-500">£{job.price_pounds}</Badge>
-                    </div>
-                  </CardHeader>
+                    </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -371,7 +459,31 @@ const DriverPortal = () => {
                     </Button>
                   </CardContent>
                 </Card>
-              ))
+                );
+              })
+            )}
+          </TabsContent>
+
+          <TabsContent value="route">
+            {assignedJobs.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <Navigation className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">Accept multiple jobs to plan your route</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <MultiStopRoute 
+                stops={assignedJobs.map((job, index) => ({
+                  id: job.id,
+                  tracking_number: job.tracking_number,
+                  recipient_name: job.recipient_name,
+                  recipient_phone: job.recipient_phone,
+                  delivery_address: job.delivery_address,
+                  delivery_city: job.delivery_city,
+                  order: index + 1
+                }))}
+              />
             )}
           </TabsContent>
 

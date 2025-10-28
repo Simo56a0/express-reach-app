@@ -12,6 +12,7 @@ import Services from "./pages/Services";
 import Pricing from "./pages/Pricing";
 import DriverPortal from "./pages/DriverPortal";
 import FAQ from "./pages/FAQ";
+import MyBookings from "./pages/MyBookings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/track" element={<Track />} />
             <Route path="/book" element={<Book />} />
+            <Route path="/my-bookings" element={<MyBookings />} />
             <Route path="/services" element={<Services />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/driver-portal" element={<DriverPortal />} />

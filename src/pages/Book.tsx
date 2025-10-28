@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -13,17 +13,31 @@ import { Package, MapPin, Calendar } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
+// Geocoding function using OpenStreetMap Nominatim (free, no API key required)
+const geocodeAddress = async (address: string, city: string, postalCode: string): Promise<{ lat: number; lng: number } | null> => {
+  try {
+    const query = `${address}, ${city}, ${postalCode}`;
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+    const data = await response.json();
+    
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    return null;
+  }
+};
+
 const Book = () => {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-    }
-  }, [user, loading, navigate]);
 
   const serviceTypes = [
     { value: 'same_day', label: 'Same Day Delivery', price: 12.99 },
@@ -41,28 +55,60 @@ const Book = () => {
     const formData = new FormData(e.currentTarget);
     const serviceType = formData.get('serviceType') as string;
     const selectedService = serviceTypes.find(s => s.value === serviceType);
+    const guestEmail = formData.get('guestEmail') as string;
+
+    // Validate guest email if not logged in
+    if (!user && !guestEmail) {
+      toast({
+        title: "Email required",
+        description: "Please provide your email to track the package",
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
+      // Geocode addresses
+      const pickupCoords = await geocodeAddress(
+        formData.get('pickupAddress') as string,
+        formData.get('pickupCity') as string,
+        formData.get('pickupPostalCode') as string
+      );
+
+      const deliveryCoords = await geocodeAddress(
+        formData.get('deliveryAddress') as string,
+        formData.get('deliveryCity') as string,
+        formData.get('deliveryPostalCode') as string
+      );
+
+      const packageData = {
+        sender_id: user?.id || null,
+        guest_email: user ? null : guestEmail,
+        recipient_name: formData.get('recipientName') as string,
+        recipient_phone: formData.get('recipientPhone') as string,
+        pickup_address: formData.get('pickupAddress') as string,
+        pickup_city: formData.get('pickupCity') as string,
+        pickup_postal_code: formData.get('pickupPostalCode') as string,
+        pickup_latitude: pickupCoords?.lat || null,
+        pickup_longitude: pickupCoords?.lng || null,
+        delivery_address: formData.get('deliveryAddress') as string,
+        delivery_city: formData.get('deliveryCity') as string,
+        delivery_postal_code: formData.get('deliveryPostalCode') as string,
+        delivery_latitude: deliveryCoords?.lat || null,
+        delivery_longitude: deliveryCoords?.lng || null,
+        package_type: formData.get('packageType') as string,
+        weight_kg: parseFloat(formData.get('weight') as string) || null,
+        dimensions: formData.get('dimensions') as string,
+        value_pounds: parseFloat(formData.get('value') as string) || null,
+        service_type: serviceType,
+        price_pounds: selectedService?.price || 0,
+        notes: formData.get('notes') as string
+      };
+
       const { data, error } = await supabase
         .from('packages')
-        .insert({
-          sender_id: user?.id,
-          recipient_name: formData.get('recipientName') as string,
-          recipient_phone: formData.get('recipientPhone') as string,
-          pickup_address: formData.get('pickupAddress') as string,
-          pickup_city: formData.get('pickupCity') as string,
-          pickup_postal_code: formData.get('pickupPostalCode') as string,
-          delivery_address: formData.get('deliveryAddress') as string,
-          delivery_city: formData.get('deliveryCity') as string,
-          delivery_postal_code: formData.get('deliveryPostalCode') as string,
-          package_type: formData.get('packageType') as string,
-          weight_kg: parseFloat(formData.get('weight') as string) || null,
-          dimensions: formData.get('dimensions') as string,
-          value_pounds: parseFloat(formData.get('value') as string) || null,
-          service_type: serviceType,
-          price_pounds: selectedService?.price || 0,
-          notes: formData.get('notes') as string
-        })
+        .insert(packageData)
         .select()
         .single();
 
@@ -70,11 +116,12 @@ const Book = () => {
 
       toast({
         title: "Booking confirmed!",
-        description: `Your package has been booked. Tracking number: ${data.tracking_number}`
+        description: `Your package has been booked. Tracking number: ${data.tracking_number}${!user ? '. Save this number to track your package!' : ''}`
       });
 
       navigate(`/track?number=${data.tracking_number}`);
     } catch (error) {
+      console.error('Booking error:', error);
       toast({
         title: "Error creating booking",
         description: "Please try again later.",
@@ -85,14 +132,6 @@ const Book = () => {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -102,9 +141,29 @@ const Book = () => {
             <Package className="h-16 w-16 text-primary mx-auto" />
             <h1 className="text-4xl font-bold">Book a Delivery</h1>
             <p className="text-muted-foreground">
-              Fill out the details below to schedule your package delivery
+              {user ? 'Fill out the details below to schedule your package delivery' : 'Book your delivery - no account required! Sign in later to track.'}
             </p>
           </div>
+
+          {!user && (
+            <Card className="bg-muted/50">
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <Label htmlFor="guestEmail">Your Email (for tracking)</Label>
+                  <Input 
+                    id="guestEmail" 
+                    name="guestEmail" 
+                    type="email" 
+                    placeholder="your@email.com"
+                    required 
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    We'll send your tracking number to this email. You can sign in later to view full details.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <Card>
