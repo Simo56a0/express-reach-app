@@ -124,20 +124,26 @@ export type Database = {
       packages: {
         Row: {
           assigned_at: string | null
+          claimed_by: string | null
           created_at: string | null
           delivered_at: string | null
           delivery_address: string
           delivery_city: string
           delivery_date: string | null
+          delivery_latitude: number | null
+          delivery_longitude: number | null
           delivery_postal_code: string
           dimensions: string | null
           driver_id: string | null
+          guest_email: string | null
           id: string
           notes: string | null
           package_type: string
           pickup_address: string
           pickup_city: string
           pickup_date: string | null
+          pickup_latitude: number | null
+          pickup_longitude: number | null
           pickup_postal_code: string
           price_pounds: number
           recipient_name: string
@@ -151,20 +157,26 @@ export type Database = {
         }
         Insert: {
           assigned_at?: string | null
+          claimed_by?: string | null
           created_at?: string | null
           delivered_at?: string | null
           delivery_address: string
           delivery_city: string
           delivery_date?: string | null
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           delivery_postal_code: string
           dimensions?: string | null
           driver_id?: string | null
+          guest_email?: string | null
           id?: string
           notes?: string | null
           package_type: string
           pickup_address: string
           pickup_city: string
           pickup_date?: string | null
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
           pickup_postal_code: string
           price_pounds: number
           recipient_name: string
@@ -178,20 +190,26 @@ export type Database = {
         }
         Update: {
           assigned_at?: string | null
+          claimed_by?: string | null
           created_at?: string | null
           delivered_at?: string | null
           delivery_address?: string
           delivery_city?: string
           delivery_date?: string | null
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           delivery_postal_code?: string
           dimensions?: string | null
           driver_id?: string | null
+          guest_email?: string | null
           id?: string
           notes?: string | null
           package_type?: string
           pickup_address?: string
           pickup_city?: string
           pickup_date?: string | null
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
           pickup_postal_code?: string
           price_pounds?: number
           recipient_name?: string
@@ -263,6 +281,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_distance: {
+        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
+        Returns: number
+      }
+      get_nearby_packages: {
+        Args: {
+          driver_lat: number
+          driver_lon: number
+          max_distance_km?: number
+        }
+        Returns: {
+          delivery_address: string
+          delivery_city: string
+          delivery_date: string
+          distance_km: number
+          id: string
+          package_type: string
+          pickup_address: string
+          pickup_city: string
+          pickup_date: string
+          price_pounds: number
+          recipient_name: string
+          recipient_phone: string
+          status: string
+          tracking_number: string
+          weight_kg: number
+        }[]
+      }
       track_package: {
         Args: { tracking_num: string }
         Returns: {
