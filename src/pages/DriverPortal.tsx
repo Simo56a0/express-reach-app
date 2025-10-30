@@ -98,19 +98,25 @@ const DriverPortal = () => {
 
   const checkDriverAccess = async () => {
     try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('user_type')
-        .eq('id', user?.id)
-        .single();
+      if (!user?.id) {
+        navigate('/auth');
+        return;
+      }
+
+      // Check if user has driver role using the secure function
+      const { data: hasRole, error } = await supabase
+        .rpc('has_role', { 
+          _user_id: user.id, 
+          _role: 'driver' 
+        });
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Error checking driver role:', error);
         navigate('/');
         return;
       }
 
-      if (profile?.user_type === 'driver') {
+      if (hasRole) {
         setIsDriver(true);
         fetchJobs();
       } else {

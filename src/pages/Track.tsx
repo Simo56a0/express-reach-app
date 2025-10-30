@@ -40,7 +40,7 @@ const Track = () => {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.rpc('track_package', {
+      const { data, error } = await supabase.rpc('get_package_by_tracking', {
         tracking_num: trackingNumber.trim()
       });
 
