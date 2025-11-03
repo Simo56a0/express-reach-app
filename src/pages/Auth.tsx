@@ -15,16 +15,20 @@ const Auth = () => {
   const [userType, setUserType] = useState('customer');
   const [driverLicense, setDriverLicense] = useState('');
   const [vehicleType, setVehicleType] = useState('');
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, userRole } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Redirect if already logged in
+  // Redirect if already logged in based on role
   useEffect(() => {
-    if (user) {
-      navigate('/');
+    if (user && userRole) {
+      if (userRole === 'driver') {
+        navigate('/driver-portal');
+      } else {
+        navigate('/');
+      }
     }
-  }, [user, navigate]);
+  }, [user, userRole, navigate]);
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -42,12 +46,13 @@ const Auth = () => {
         description: error.message,
         variant: "destructive"
       });
+      setIsLoading(false);
     } else {
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in."
       });
-      navigate('/');
+      // Navigation will be handled by useEffect based on role
     }
     
     setIsLoading(false);
