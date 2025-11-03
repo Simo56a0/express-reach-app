@@ -89,8 +89,8 @@ const Header = () => {
                 <Button variant="ghost" onClick={() => navigate('/book')}>
                   Book Now
                 </Button>
-                <Button variant="ghost" onClick={() => navigate('/auth')}>Sign In</Button>
-                <Button onClick={() => navigate('/auth')}>Get Started</Button>
+                <Button variant="outline" onClick={() => navigate('/auth')}>Customer Sign In</Button>
+                <Button onClick={() => navigate('/driver-auth')}>Driver Sign In</Button>
               </>
             )}
           </div>
@@ -136,8 +136,8 @@ const Header = () => {
                 ) : (
                   <>
                     <Button variant="ghost" onClick={() => navigate('/book')}>Book Now</Button>
-                    <Button variant="ghost" onClick={() => navigate('/auth')}>Sign In</Button>
-                    <Button onClick={() => navigate('/auth')}>Get Started</Button>
+                    <Button variant="outline" onClick={() => navigate('/auth')}>Customer Sign In</Button>
+                    <Button onClick={() => navigate('/driver-auth')}>Driver Sign In</Button>
                   </>
                 )}
               </div>

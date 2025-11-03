@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import DriverAuth from "./pages/DriverAuth";
 import Track from "./pages/Track";
 import Book from "./pages/Book";
 import Services from "./pages/Services";
@@ -28,6 +29,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/driver-auth" element={<DriverAuth />} />
             <Route path="/track" element={<Track />} />
             <Route path="/book" element={
               <ProtectedRoute>

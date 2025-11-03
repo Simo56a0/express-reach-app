@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -8,27 +8,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Package, ArrowLeft } from 'lucide-react';
-import { useEffect } from 'react';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [userType, setUserType] = useState('customer');
-  const [driverLicense, setDriverLicense] = useState('');
-  const [vehicleType, setVehicleType] = useState('');
-  const { signIn, signUp, user, userRole } = useAuth();
+  const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Redirect if already logged in based on role
+  // Redirect if already logged in
   useEffect(() => {
-    if (user && userRole) {
-      if (userRole === 'driver') {
-        navigate('/driver-portal');
-      } else {
-        navigate('/');
-      }
+    if (user) {
+      navigate('/');
     }
-  }, [user, userRole, navigate]);
+  }, [user, navigate]);
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -66,11 +58,8 @@ const Auth = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const fullName = formData.get('fullName') as string;
-    const formUserType = formData.get('userType') as string || 'customer';
-    const formDriverLicense = formData.get('driverLicense') as string;
-    const formVehicleType = formData.get('vehicleType') as string;
 
-    const { error } = await signUp(email, password, fullName, formUserType, formDriverLicense, formVehicleType);
+    const { error } = await signUp(email, password, fullName, 'customer');
     
     if (error) {
       toast({
@@ -107,9 +96,9 @@ const Auth = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Welcome</CardTitle>
+            <CardTitle>Customer Portal</CardTitle>
             <CardDescription>
-              Sign in to your account or create a new one to start shipping
+              Sign in or create your customer account to start shipping
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -141,7 +130,7 @@ const Auth = () => {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In"}
+                    {isLoading ? "Signing in..." : "Sign In as Customer"}
                   </Button>
                 </form>
               </TabsContent>
@@ -177,51 +166,8 @@ const Auth = () => {
                       required
                     />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="userType">Account Type</Label>
-                    <select 
-                      id="userType"
-                      name="userType"
-                      value={userType}
-                      onChange={(e) => setUserType(e.target.value)}
-                      className="w-full px-3 py-2 border border-input bg-background rounded-md"
-                    >
-                      <option value="customer">Customer</option>
-                      <option value="driver">Driver</option>
-                    </select>
-                  </div>
-
-                  {userType === 'driver' && (
-                    <>
-                      <div className="space-y-2">
-                        <Label htmlFor="driverLicense">Driver License Number</Label>
-                        <Input
-                          id="driverLicense"
-                          name="driverLicense"
-                          type="text"
-                          placeholder="License number"
-                          value={driverLicense}
-                          onChange={(e) => setDriverLicense(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="vehicleType">Vehicle Type</Label>
-                        <Input
-                          id="vehicleType"
-                          name="vehicleType"
-                          type="text"
-                          placeholder="e.g., Van, Motorcycle"
-                          value={vehicleType}
-                          onChange={(e) => setVehicleType(e.target.value)}
-                          required
-                        />
-                      </div>
-                    </>
-                  )}
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Creating account..." : "Create Account"}
+                    {isLoading ? "Creating account..." : "Create Customer Account"}
                   </Button>
                 </form>
               </TabsContent>
