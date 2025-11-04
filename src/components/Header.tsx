@@ -30,35 +30,7 @@ const Header = () => {
           {/* Desktop Navigation */}
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
-              <NavigationMenuItem>
-                <Link to="/services">
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Services
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/pricing">
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Pricing
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/track">
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Track Package
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/faq">
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    FAQ
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              {user && userRole === 'driver' && (
+              {user && userRole === 'driver' ? (
                 <NavigationMenuItem>
                   <Link to="/driver-portal">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -66,6 +38,37 @@ const Header = () => {
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
+              ) : (
+                <>
+                  <NavigationMenuItem>
+                    <Link to="/services">
+                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        Services
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link to="/pricing">
+                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        Pricing
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link to="/track">
+                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        Track Package
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link to="/faq">
+                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        FAQ
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                </>
               )}
             </NavigationMenuList>
           </NavigationMenu>
@@ -108,18 +111,26 @@ const Header = () => {
         {isMenuOpen && (
           <nav className="md:hidden mt-4 pb-4 border-t border-border pt-4">
             <div className="flex flex-col space-y-4">
-              <button onClick={() => navigate('/services')} className="text-foreground hover:text-primary transition-colors text-left">
-                Services
-              </button>
-              <button onClick={() => navigate('/track')} className="text-foreground hover:text-primary transition-colors text-left">
-                Track Package
-              </button>
-              <button onClick={() => navigate('/pricing')} className="text-foreground hover:text-primary transition-colors text-left">
-                Pricing
-              </button>
-              <button onClick={() => navigate('/#contact')} className="text-foreground hover:text-primary transition-colors text-left">
-                Contact
-              </button>
+              {user && userRole === 'driver' ? (
+                <button onClick={() => navigate('/driver-portal')} className="text-foreground hover:text-primary transition-colors text-left">
+                  Driver Portal
+                </button>
+              ) : (
+                <>
+                  <button onClick={() => navigate('/services')} className="text-foreground hover:text-primary transition-colors text-left">
+                    Services
+                  </button>
+                  <button onClick={() => navigate('/track')} className="text-foreground hover:text-primary transition-colors text-left">
+                    Track Package
+                  </button>
+                  <button onClick={() => navigate('/pricing')} className="text-foreground hover:text-primary transition-colors text-left">
+                    Pricing
+                  </button>
+                  <button onClick={() => navigate('/#contact')} className="text-foreground hover:text-primary transition-colors text-left">
+                    Contact
+                  </button>
+                </>
+              )}
               <div className="flex flex-col space-y-2 pt-4">
                 {user ? (
                   <>

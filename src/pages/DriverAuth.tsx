@@ -10,15 +10,16 @@ import { useToast } from "@/hooks/use-toast";
 import { Truck, ArrowLeft } from "lucide-react";
 
 const DriverAuth = () => {
-  const [loading, setLoading] = useState(false);
-  const { signIn, signUp, user, userRole } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const { signIn, signUp, user, userRole, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    if (loading) return;
     if (user && userRole === 'driver') {
       navigate('/driver-portal');
-    } else if (user && userRole !== 'driver') {
+    } else if (user && userRole && userRole !== 'driver') {
       toast({
         title: "Access Denied",
         description: "You must have a driver account to access the driver portal.",
@@ -26,11 +27,11 @@ const DriverAuth = () => {
       });
       navigate('/');
     }
-  }, [user, userRole, navigate, toast]);
+  }, [user, userRole, loading, navigate, toast]);
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
@@ -49,12 +50,12 @@ const DriverAuth = () => {
         description: "Signed in successfully!"
       });
     }
-    setLoading(false);
+    setSubmitting(false);
   };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
@@ -76,7 +77,7 @@ const DriverAuth = () => {
         description: "Account created successfully!"
       });
     }
-    setLoading(false);
+    setSubmitting(false);
   };
 
   return (
@@ -134,8 +135,8 @@ const DriverAuth = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Signing in..." : "Sign In as Driver"}
+                  <Button type="submit" className="w-full" disabled={submitting}>
+                    {submitting ? "Signing in..." : "Sign In as Driver"}
                   </Button>
                 </form>
               </TabsContent>
@@ -188,8 +189,8 @@ const DriverAuth = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating account..." : "Register as Driver"}
+                  <Button type="submit" className="w-full" disabled={submitting}>
+                    {submitting ? "Creating account..." : "Register as Driver"}
                   </Button>
                 </form>
               </TabsContent>

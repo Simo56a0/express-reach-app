@@ -304,6 +304,34 @@ const DriverPortal = () => {
           <p className="text-muted-foreground">Manage your deliveries and communicate with customers</p>
         </div>
 
+        {/* Placeholder overview cards */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Earnings (placeholder)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              Coming soon: daily/weekly earnings
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Schedule (placeholder)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              Coming soon: upcoming shifts and availability
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Ratings (placeholder)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              Coming soon: customer feedback and performance
+            </CardContent>
+          </Card>
+        </section>
+
         <Tabs defaultValue="assigned" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="assigned">My Jobs ({assignedJobs.length})</TabsTrigger>
