@@ -16,7 +16,7 @@ import {
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, userRole, signOut } = useAuth();
 
   return (
     <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
@@ -58,7 +58,7 @@ const Header = () => {
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
-              {user && (
+              {user && userRole === 'driver' && (
                 <NavigationMenuItem>
                   <Link to="/driver-portal">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
