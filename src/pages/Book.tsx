@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Package, MapPin, Calendar } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { bookingSchema } from '@/lib/validationSchemas';
 
 // Geocoding function using OpenStreetMap Nominatim (free, no API key required)
 const geocodeAddress = async (address: string, city: string, postalCode: string): Promise<{ lat: number; lng: number } | null> => {
@@ -53,12 +54,28 @@ const Book = () => {
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
-    const serviceType = formData.get('serviceType') as string;
-    const selectedService = serviceTypes.find(s => s.value === serviceType);
-    const guestEmail = formData.get('guestEmail') as string;
+    
+    // Prepare data for validation
+    const formValues = {
+      recipientName: formData.get('recipientName') as string,
+      recipientPhone: formData.get('recipientPhone') as string,
+      guestEmail: formData.get('guestEmail') as string,
+      pickupAddress: formData.get('pickupAddress') as string,
+      pickupCity: formData.get('pickupCity') as string,
+      pickupPostalCode: formData.get('pickupPostalCode') as string,
+      deliveryAddress: formData.get('deliveryAddress') as string,
+      deliveryCity: formData.get('deliveryCity') as string,
+      deliveryPostalCode: formData.get('deliveryPostalCode') as string,
+      packageType: formData.get('packageType') as string,
+      weight: formData.get('weight') as string,
+      value: formData.get('value') as string,
+      dimensions: formData.get('dimensions') as string,
+      notes: formData.get('notes') as string,
+      serviceType: formData.get('serviceType') as string
+    };
 
     // Validate guest email if not logged in
-    if (!user && !guestEmail) {
+    if (!user && !formValues.guestEmail) {
       toast({
         title: "Email required",
         description: "Please provide your email to track the package",
@@ -68,42 +85,57 @@ const Book = () => {
       return;
     }
 
+    // Validate form data
+    const validation = bookingSchema.safeParse(formValues);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Validation Error",
+        description: firstError.message,
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
+      const serviceType = formValues.serviceType;
+      const selectedService = serviceTypes.find(s => s.value === serviceType);
       // Geocode addresses
       const pickupCoords = await geocodeAddress(
-        formData.get('pickupAddress') as string,
-        formData.get('pickupCity') as string,
-        formData.get('pickupPostalCode') as string
+        formValues.pickupAddress,
+        formValues.pickupCity,
+        formValues.pickupPostalCode
       );
 
       const deliveryCoords = await geocodeAddress(
-        formData.get('deliveryAddress') as string,
-        formData.get('deliveryCity') as string,
-        formData.get('deliveryPostalCode') as string
+        formValues.deliveryAddress,
+        formValues.deliveryCity,
+        formValues.deliveryPostalCode
       );
 
       const packageData = {
         sender_id: user?.id || null,
-        guest_email: user ? null : guestEmail,
-        recipient_name: formData.get('recipientName') as string,
-        recipient_phone: formData.get('recipientPhone') as string,
-        pickup_address: formData.get('pickupAddress') as string,
-        pickup_city: formData.get('pickupCity') as string,
-        pickup_postal_code: formData.get('pickupPostalCode') as string,
+        guest_email: user ? null : formValues.guestEmail,
+        recipient_name: formValues.recipientName,
+        recipient_phone: formValues.recipientPhone,
+        pickup_address: formValues.pickupAddress,
+        pickup_city: formValues.pickupCity,
+        pickup_postal_code: formValues.pickupPostalCode,
         pickup_latitude: pickupCoords?.lat || null,
         pickup_longitude: pickupCoords?.lng || null,
-        delivery_address: formData.get('deliveryAddress') as string,
-        delivery_city: formData.get('deliveryCity') as string,
-        delivery_postal_code: formData.get('deliveryPostalCode') as string,
+        delivery_address: formValues.deliveryAddress,
+        delivery_city: formValues.deliveryCity,
+        delivery_postal_code: formValues.deliveryPostalCode,
         delivery_latitude: deliveryCoords?.lat || null,
         delivery_longitude: deliveryCoords?.lng || null,
-        package_type: formData.get('packageType') as string,
-        weight_kg: parseFloat(formData.get('weight') as string) || null,
-        dimensions: formData.get('dimensions') as string,
-        value_pounds: parseFloat(formData.get('value') as string) || null,
+        package_type: formValues.packageType,
+        weight_kg: formValues.weight ? parseFloat(formValues.weight) : null,
+        dimensions: formValues.dimensions,
+        value_pounds: formValues.value ? parseFloat(formValues.value) : null,
         service_type: serviceType,
         price_pounds: selectedService?.price || 0,
-        notes: formData.get('notes') as string
+        notes: formValues.notes
       };
 
       const { data, error } = await supabase
@@ -121,7 +153,6 @@ const Book = () => {
 
       navigate(`/track?number=${data.tracking_number}`);
     } catch (error) {
-      console.error('Booking error:', error);
       toast({
         title: "Error creating booking",
         description: "Please try again later.",

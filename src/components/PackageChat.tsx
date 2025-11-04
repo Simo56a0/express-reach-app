@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Send, User, Truck } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { messageSchema } from '@/lib/validationSchemas';
 
 interface Message {
   id: string;
@@ -103,6 +104,18 @@ const PackageChat = ({ packageData, onBack }: PackageChatProps) => {
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
 
+    // Validate message
+    const validation = messageSchema.safeParse({ message: newMessage });
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Validation Error",
+        description: firstError.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('chat_messages')
@@ -117,7 +130,6 @@ const PackageChat = ({ packageData, onBack }: PackageChatProps) => {
       setNewMessage('');
       // Message will be added via real-time subscription
     } catch (error) {
-      console.error('Error sending message:', error);
       toast({
         title: "Error",
         description: "Failed to send message",

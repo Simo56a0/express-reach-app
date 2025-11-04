@@ -12,7 +12,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Package, Edit, Trash2, MapPin, Calendar } from 'lucide-react';
+import { Package, Edit, XCircle, MapPin, Calendar } from 'lucide-react';
+import { editBookingSchema } from '@/lib/validationSchemas';
 
 interface PackageBooking {
   id: string;
@@ -77,16 +78,38 @@ const MyBookings = () => {
     setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
 
+    const formValues = {
+      recipientName: formData.get('recipientName') as string,
+      recipientPhone: formData.get('recipientPhone') as string,
+      deliveryAddress: formData.get('deliveryAddress') as string,
+      deliveryCity: formData.get('deliveryCity') as string,
+      packageType: formData.get('packageType') as string,
+      notes: formData.get('notes') as string
+    };
+
+    // Validate form data
+    const validation = editBookingSchema.safeParse(formValues);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Validation Error",
+        description: firstError.message,
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('packages')
         .update({
-          recipient_name: formData.get('recipientName') as string,
-          recipient_phone: formData.get('recipientPhone') as string,
-          delivery_address: formData.get('deliveryAddress') as string,
-          delivery_city: formData.get('deliveryCity') as string,
-          package_type: formData.get('packageType') as string,
-          notes: formData.get('notes') as string
+          recipient_name: formValues.recipientName,
+          recipient_phone: formValues.recipientPhone,
+          delivery_address: formValues.deliveryAddress,
+          delivery_city: formValues.deliveryCity,
+          package_type: formValues.packageType,
+          notes: formValues.notes
         })
         .eq('id', editingPackage.id);
 
@@ -100,7 +123,6 @@ const MyBookings = () => {
       setEditingPackage(null);
       fetchBookings();
     } catch (error) {
-      console.error('Error updating booking:', error);
       toast({
         title: "Error",
         description: "Failed to update booking",
@@ -111,13 +133,13 @@ const MyBookings = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleCancel = async (id: string) => {
     if (!confirm('Are you sure you want to cancel this booking?')) return;
 
     try {
       const { error } = await supabase
         .from('packages')
-        .delete()
+        .update({ status: 'cancelled' })
         .eq('id', id);
 
       if (error) throw error;
@@ -129,7 +151,6 @@ const MyBookings = () => {
 
       fetchBookings();
     } catch (error) {
-      console.error('Error deleting booking:', error);
       toast({
         title: "Error",
         description: "Failed to cancel booking",
@@ -145,6 +166,7 @@ const MyBookings = () => {
       case 'picked_up': return 'bg-orange-500';
       case 'in_transit': return 'bg-purple-500';
       case 'delivered': return 'bg-green-500';
+      case 'cancelled': return 'bg-red-500';
       default: return 'bg-gray-500';
     }
   };
@@ -330,10 +352,10 @@ const MyBookings = () => {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => handleDelete(booking.id)}
+                            onClick={() => handleCancel(booking.id)}
                           >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Cancel
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Cancel Booking
                           </Button>
                         </>
                       )}
