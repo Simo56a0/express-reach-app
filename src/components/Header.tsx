@@ -22,10 +22,10 @@ const Header = () => {
     <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <Package className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold text-foreground">SwiftCourier</span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <NavigationMenu className="hidden md:flex">

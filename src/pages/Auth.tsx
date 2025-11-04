@@ -78,11 +78,16 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
-        <div className="flex items-center justify-center space-x-2 mb-8">
-          <Package className="h-8 w-8 text-primary" />
-          <span className="text-2xl font-bold">SwiftCourier</span>
+        <div className="text-center space-y-2">
+          <div className="flex justify-center mb-4">
+            <div className="bg-primary/10 p-4 rounded-full">
+              <Package className="h-12 w-12 text-primary" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Customer Portal</h1>
+          <p className="text-muted-foreground">Ship your packages with ease</p>
         </div>
 
         <Button
@@ -96,7 +101,7 @@ const Auth = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Customer Portal</CardTitle>
+            <CardTitle>Customer Authentication</CardTitle>
             <CardDescription>
               Sign in or create your customer account to start shipping
             </CardDescription>
