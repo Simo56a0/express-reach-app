@@ -3,7 +3,6 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -19,4 +18,13 @@ export default defineConfig(({ mode }) => ({
   optimizeDeps: {
     include: ["react", "react-dom"],
   },
+
+  // ✅ Add this section for production hosting on Render
+  build: {
+    outDir: "dist", // where Render expects built files
+    emptyOutDir: true,
+  },
+
+  // ✅ Important for React Router on Render
+  base: "./", // ensures paths resolve correctly in static hosting
 }));
