@@ -11,6 +11,7 @@ import { Package, ArrowLeft } from 'lucide-react';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [tab, setTab] = useState<'signin' | 'signup'>("signin");
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -58,9 +59,10 @@ const Auth = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const fullName = formData.get('fullName') as string;
+    const username = formData.get('username') as string;
 
-    const { error } = await signUp(email, password, fullName, 'customer');
-    
+    const { error } = await signUp(email, password, fullName, 'customer', undefined, undefined, username);
+
     if (error) {
       toast({
         title: "Error creating account",
@@ -70,10 +72,11 @@ const Auth = () => {
     } else {
       toast({
         title: "Account created!",
-        description: "Please check your email to verify your account."
+        description: "You can now sign in.",
       });
+      setTab('signin');
     }
-    
+
     setIsLoading(false);
   };
 
@@ -107,7 +110,7 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
+            <Tabs value={tab} onValueChange={(v) => setTab(v as 'signin' | 'signup')} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -149,6 +152,16 @@ const Auth = () => {
                       name="fullName"
                       type="text"
                       placeholder="John Doe"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      name="username"
+                      type="text"
+                      placeholder="johndoe"
                       required
                     />
                   </div>
