@@ -77,12 +77,16 @@ const Header = () => {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                <Button variant="ghost" onClick={() => navigate('/my-bookings')}>
-                  My Bookings
-                </Button>
-                <Button variant="ghost" onClick={() => navigate('/book')}>
-                  Book Delivery
-                </Button>
+                {userRole !== 'driver' && (
+                  <>
+                    <Button variant="ghost" onClick={() => navigate('/my-bookings')}>
+                      My Bookings
+                    </Button>
+                    <Button variant="ghost" onClick={() => navigate('/book')}>
+                      Book Delivery
+                    </Button>
+                  </>
+                )}
                 <Button variant="ghost" onClick={signOut}>
                   Sign Out
                 </Button>
@@ -134,12 +138,16 @@ const Header = () => {
               <div className="flex flex-col space-y-2 pt-4">
                 {user ? (
                   <>
-                    <Button variant="ghost" onClick={() => navigate('/my-bookings')}>
-                      My Bookings
-                    </Button>
-                    <Button variant="ghost" onClick={() => navigate('/book')}>
-                      Book Delivery
-                    </Button>
+                    {userRole !== 'driver' && (
+                      <>
+                        <Button variant="ghost" onClick={() => navigate('/my-bookings')}>
+                          My Bookings
+                        </Button>
+                        <Button variant="ghost" onClick={() => navigate('/book')}>
+                          Book Delivery
+                        </Button>
+                      </>
+                    )}
                     <Button variant="ghost" onClick={signOut}>
                       Sign Out
                     </Button>

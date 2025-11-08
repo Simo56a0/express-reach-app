@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,9 +11,11 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Package, Clock, MapPin, Phone, ShieldX, Navigation } from 'lucide-react';
+import { Package, Clock, MapPin, Phone, ShieldX, Navigation, DollarSign, TrendingUp, History, CheckCircle } from 'lucide-react';
 import PackageChat from '@/components/PackageChat';
 import MultiStopRoute from '@/components/MultiStopRoute';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 
 interface Package {
   id: string;
@@ -304,39 +306,49 @@ const DriverPortal = () => {
           <p className="text-muted-foreground">Manage your deliveries and communicate with customers</p>
         </div>
 
-        {/* Placeholder overview cards */}
+        {/* Overview cards */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card>
-            <CardHeader>
-              <CardTitle>Earnings (placeholder)</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              Coming soon: daily/weekly earnings
+              <div className="text-2xl font-bold">£0.00</div>
+              <p className="text-xs text-muted-foreground">Available to withdraw</p>
             </CardContent>
           </Card>
+          
           <Card>
-            <CardHeader>
-              <CardTitle>Schedule (placeholder)</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">This Month</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              Coming soon: upcoming shifts and availability
+              <div className="text-2xl font-bold">£0.00</div>
+              <p className="text-xs text-muted-foreground">Total earnings</p>
             </CardContent>
           </Card>
+          
           <Card>
-            <CardHeader>
-              <CardTitle>Ratings (placeholder)</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Completed</CardTitle>
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              Coming soon: customer feedback and performance
+              <div className="text-2xl font-bold">{assignedJobs.filter(j => j.status === 'delivered').length}</div>
+              <p className="text-xs text-muted-foreground">Trips this month</p>
             </CardContent>
           </Card>
         </section>
 
         <Tabs defaultValue="assigned" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="assigned">My Jobs ({assignedJobs.length})</TabsTrigger>
-            <TabsTrigger value="available">Available Jobs</TabsTrigger>
-            <TabsTrigger value="route">Multi-Stop Route</TabsTrigger>
+            <TabsTrigger value="available">Available</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
+            <TabsTrigger value="route">Route</TabsTrigger>
             <TabsTrigger value="chat">Chat</TabsTrigger>
           </TabsList>
 
@@ -496,6 +508,127 @@ const DriverPortal = () => {
                 );
               })
             )}
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <History className="h-5 w-5" />
+                  Trip History
+                </CardTitle>
+                <CardDescription>Your completed deliveries</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {assignedJobs.filter(job => job.status === 'delivered').length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No completed trips yet</p>
+                ) : (
+                  <div className="space-y-4">
+                    {assignedJobs.filter(job => job.status === 'delivered').map((job) => (
+                      <Card key={job.id}>
+                        <CardContent className="pt-6">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <p className="font-semibold">{job.tracking_number}</p>
+                              <p className="text-sm text-muted-foreground">{job.recipient_name}</p>
+                            </div>
+                            <Badge variant="default">Completed</Badge>
+                          </div>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex items-start gap-2">
+                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                              <div>
+                                <p className="font-medium">Pickup</p>
+                                <p className="text-muted-foreground">{job.pickup_address}, {job.pickup_city}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                              <div>
+                                <p className="font-medium">Delivery</p>
+                                <p className="text-muted-foreground">{job.delivery_address}, {job.delivery_city}</p>
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center pt-2 border-t">
+                              <span className="text-muted-foreground">Earnings</span>
+                              <span className="font-semibold">£{job.price_pounds}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="payments" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  Payment Overview
+                </CardTitle>
+                <CardDescription>Your earnings and balance</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 border rounded-lg">
+                      <p className="text-sm text-muted-foreground">Current Balance</p>
+                      <p className="text-3xl font-bold">£0.00</p>
+                    </div>
+                    <div className="p-4 border rounded-lg">
+                      <p className="text-sm text-muted-foreground">Pending Payments</p>
+                      <p className="text-3xl font-bold">£0.00</p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Earnings Over Time</h3>
+                    <ChartContainer
+                      config={{
+                        earnings: {
+                          label: "Earnings",
+                          color: "hsl(var(--primary))",
+                        },
+                      }}
+                      className="h-[300px]"
+                    >
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart
+                          data={[
+                            { date: "Mon", earnings: 0 },
+                            { date: "Tue", earnings: 0 },
+                            { date: "Wed", earnings: 0 },
+                            { date: "Thu", earnings: 0 },
+                            { date: "Fri", earnings: 0 },
+                            { date: "Sat", earnings: 0 },
+                            { date: "Sun", earnings: 0 },
+                          ]}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Line
+                            type="monotone"
+                            dataKey="earnings"
+                            stroke="hsl(var(--primary))"
+                            strokeWidth={2}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </div>
+
+                  <div>
+                    <Button className="w-full">Request Withdrawal</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="route">
